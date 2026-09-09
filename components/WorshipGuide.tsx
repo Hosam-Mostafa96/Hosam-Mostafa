@@ -19,10 +19,10 @@ const WorshipGuide: React.FC = () => {
           <div className="p-2 bg-emerald-100 rounded-xl">
             <Target className="w-6 h-6 text-emerald-600" />
           </div>
-          <h2 className="text-xl font-bold text-slate-800 header-font">الدليل الشامل لنظام الميزان</h2>
+          <h2 className="text-xl font-bold text-slate-800 header-font">الدليل الشامل لتطبيق أوراد</h2>
         </div>
         <p className="text-sm text-slate-500 leading-relaxed header-font">
-          نظام الميزان هو أداة رقمية لمحاسبة النفس، تعتمد على تحويل الطاعات إلى "رصيد روحي" يعكس الجهد المبذول والوقت المستثمر في التقرب إلى الله.
+          تطبيق أوراد هو أداة رقمية لمحاسبة النفس، تعتمد على متابعة الطاعات وبناء الأوراد اليومية لتعكس الجهد المبذول والوقت المستثمر في التقرب إلى الله.
         </p>
       </div>
 

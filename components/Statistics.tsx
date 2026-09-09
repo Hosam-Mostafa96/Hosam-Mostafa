@@ -235,7 +235,7 @@ const Statistics: React.FC<StatisticsProps> = ({ user, logs, weights, books, las
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(logs, null, 2));
     const downloadAnchorNode = document.createElement('a');
     downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `mizan_backup_${format(new Date(), 'yyyy_MM_dd')}.json`);
+    downloadAnchorNode.setAttribute("download", `awrad_backup_${format(new Date(), 'yyyy_MM_dd')}.json`);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();

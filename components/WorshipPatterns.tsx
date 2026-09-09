@@ -220,7 +220,7 @@ const WorshipPatterns: React.FC<WorshipPatternsProps> = ({ logs, weights }) => {
         <div>
           <h4 className="text-sm font-bold text-emerald-800 mb-1 header-font">العبادة استثمار وليست عبئاً</h4>
           <p className="text-xs text-emerald-700 leading-relaxed font-bold header-font">
-            نظام الميزان يهدف لتغيير نظرتك للعمل الصالح؛ لتراه كمشروع ينمو وتزداد "جودته" مع الوقت، وليس مجرد مهام تنتهي منها.
+            تطبيق أوراد يهدف لتغيير نظرتك للعمل الصالح؛ لتراه كمشروع ينمو وتزداد "جودته" مع الوقت، وليس مجرد مهام تنتهي منها.
           </p>
         </div>
       </div>

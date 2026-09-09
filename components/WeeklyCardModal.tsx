@@ -171,7 +171,7 @@ export const WeeklyCardModal: React.FC<WeeklyCardModalProps> = ({
         backgroundColor: theme === 'ivory' ? '#fdfbf7' : '#030712'
       });
       const link = document.createElement('a');
-      link.download = `mizan-weekly-${format(new Date(), 'yyyy-MM-dd')}.png`;
+      link.download = `awrad-weekly-${format(new Date(), 'yyyy-MM-dd')}.png`;
       link.href = dataUrl;
       link.click();
       
@@ -201,13 +201,13 @@ export const WeeklyCardModal: React.FC<WeeklyCardModalProps> = ({
       // تحويل dataUrl إلى Blob
       const res = await fetch(dataUrl);
       const blob = await res.blob();
-      const file = new File([blob], `mizan-weekly.png`, { type: 'image/png' });
+      const file = new File([blob], `awrad-weekly.png`, { type: 'image/png' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: 'حصادي الإيماني الأسبوعي - تطبيق ميزان',
-          text: `«وَفِي ذَٰلِكَ فَلْيَتَنَافَسِ الْمُتَنَافِسُونَ» ✨ حصيلة عبادتي للأسبوع عبر تطبيق ميزان.`
+          title: 'حصادي الإيماني الأسبوعي - تطبيق أوراد',
+          text: `«وَفِي ذَٰلِكَ فَلْيَتَنَافَسِ الْمُتَنَافِسُونَ» ✨ حصيلة عبادتي للأسبوع عبر تطبيق أوراد.`
         });
       } else {
         // Fallback: تحميل الصورة مباشرة مع إشعار
@@ -246,7 +246,7 @@ ${stats.fastingDays > 0 ? `• الصيام: ${stats.fastingDays} أيام لل�
 🔥 *التتابع الإيماني:* ${stats.streakDays} من ٧ أيام بفضل الله
 ───────────────
 «وَسَارِعُوا إِلَىٰ مَغْفِرَةٍ مِّن رَّبِّكُمْ وَجَنَّةٍ عَرْضُهَا السَّمَاوَاتُ وَالْأَرْضُ»
-📱 تم التوليد عبر تطبيق *ميزان العابدين*`;
+📱 تم التوليد عبر تطبيق *أوراد*`;
 
     navigator.clipboard.writeText(text);
     setCopiedText(true);
@@ -550,7 +550,7 @@ ${stats.fastingDays > 0 ? `• الصيام: ${stats.fastingDays} أيام لل�
                 «وَسَارِعُوا إِلَىٰ مَغْفِرَةٍ مِّن رَّبِّكُمْ وَجَنَّةٍ عَرْضُهَا السَّمَاوَاتُ وَالْأَرْضُ أُعِدَّتْ لِلْمُتَّقِينَ»
               </p>
               <span className="text-[8px] opacity-70 block mt-0.5">
-                تطبيق ميزان العابدين — تثبيت الطاعة وترقية الإيمان
+                تطبيق أوراد — تثبيت الطاعة وترقية الإيمان
               </span>
             </div>
           </div>
