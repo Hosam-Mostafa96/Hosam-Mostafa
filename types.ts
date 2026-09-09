@@ -59,6 +59,21 @@ export interface ReflectionNote {
   timestamp: number;
 }
 
+export interface TadabburNote {
+  id: string;
+  date: string; // YYYY-MM-DD
+  surahNumber: number;
+  surahName: string;
+  ayahNumber: string; // e.g. "152" or "152-153"
+  ayahText?: string;
+  reflection: string; // الخاطرة والتأمل الإيماني
+  practicalApplication?: string; // العمل بالآية والتطبيق السلوكي
+  duaFromAyah?: string; // دعاء ومناجاة مستنبطة من الآية
+  theme: string; // تصنيف الموضوع
+  isFavorite?: boolean;
+  timestamp: number;
+}
+
 export interface SleepSession {
   id: string;
   start: string;
@@ -121,6 +136,7 @@ export interface DailyLog {
   isSupplicatingAloud: boolean;
   notes?: string;
   reflections: ReflectionNote[];
+  tadabburNotes?: TadabburNote[];
 }
 
 export interface PrayerEntry {
@@ -130,3 +146,17 @@ export interface PrayerEntry {
   internalSunnahPackage: 'none' | 'basic' | 'good' | 'excellent';
   surroundingSunnahIds: string[];
 }
+
+export interface FortyDayChallenge {
+  id: string;
+  habitTitle: string;
+  habitCategory?: string;
+  habitDescription?: string;
+  startDate: string; // YYYY-MM-DD
+  completedDays: string[]; // dates of completed days (YYYY-MM-DD)
+  targetDays: number; // 40
+  isCompleted?: boolean;
+  notes?: string;
+  createdAt: number;
+}
+

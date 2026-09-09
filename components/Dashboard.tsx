@@ -28,16 +28,19 @@ import {
   Meh,
   Frown,
   Ghost,
-  CloudSun
+  CloudSun,
+  BookOpen
 } from 'lucide-react';
 import { XAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ReferenceLine, YAxis } from 'recharts';
 import { format, addDays } from 'date-fns';
 // Fix: Use arSA instead of ar to avoid export errors in some date-fns environments
 import { arSA as ar } from 'date-fns/locale';
-import { DailyLog, AppWeights, PrayerName, PrayerEntry, Book } from '../types';
+import { DailyLog, AppWeights, PrayerName, PrayerEntry, Book, User } from '../types';
 import { calculateTotalScore } from '../utils/scoring';
 import confetti from 'canvas-confetti';
 import { NextPrayerWidget } from './NextPrayerWidget';
+import { WeeklyCardModal } from './WeeklyCardModal';
+import { DAILY_TADABBUR_SEEDS } from '../utils/quranData';
 
 interface DashboardProps {
   log: DailyLog;
@@ -53,12 +56,14 @@ interface DashboardProps {
   installPrompt: any;
   onClearInstallPrompt: () => void;
   onUpdateLog: (log: DailyLog) => void;
+  user?: User | null;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ 
   log, logs, weights, onDateChange, targetScore, onTargetChange, onOpenSettings,
-  books, onUpdateBook, onSwitchTab, installPrompt, onClearInstallPrompt, onUpdateLog
+  books, onUpdateBook, onSwitchTab, installPrompt, onClearInstallPrompt, onUpdateLog, user
 }) => {
+  const [showWeeklyCard, setShowWeeklyCard] = useState(false);
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [tempTarget, setTempTarget] = useState(targetScore.toString());
   const [readingInput, setReadingInput] = useState('');
@@ -73,6 +78,22 @@ const Dashboard: React.FC<DashboardProps> = ({
       return {};
     }
   });
+
+  const activeFortyChallenge = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('worship_forty_challenges_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.find((c: any) => !c.isCompleted) || parsed[0] || null;
+      }
+    } catch (e) {}
+    return null;
+  }, []);
+
+  const todayTadabburSeed = useMemo(() => {
+    const day = new Date().getDate();
+    return DAILY_TADABBUR_SEEDS[day % DAILY_TADABBUR_SEEDS.length];
+  }, []);
 
   // مراقبة وحفظ توقيت تسجيل العبادات التفاعلية المخصصة لرفع الايمان بدقة في ساعة التسجيل الفعلي
   useEffect(() => {
@@ -455,9 +476,9 @@ const Dashboard: React.FC<DashboardProps> = ({
               <Sparkles className="w-6 h-6 text-yellow-300 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-sm font-black header-font leading-tight">الأذكار والتحصين التفاعلي 🌅 🌃</h3>
+              <h3 className="text-sm font-black header-font leading-tight">الأذكار والتحصين التفاعلي 🌅 🌃 🛌</h3>
               <p className="text-[10px] text-emerald-200 mt-1 font-bold leading-relaxed">
-                اضغط لقراءة أذكار الصباح والمساء. تحكّم بالعداد بلمسة مع تغذية ونقاط فوريّة للرصيد الروحي!
+                اضغط لقراءة أذكار الصباح والمساء والنوم. تحكّم بالعداد بلمسة مع تغذية ونقاط فوريّة للرصيد الروحي!
               </p>
             </div>
           </div>
@@ -469,6 +490,88 @@ const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
       </div>
+
+      {/* تحدي الأربعين يوماً */}
+      <div className="bg-gradient-to-r from-amber-700 via-amber-800 to-emerald-900 text-white rounded-[2rem] p-6 shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full opacity-30 -translate-x-12 -translate-y-12 blur-2xl pointer-events-none"></div>
+        <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 bg-white/10 rounded-2xl border border-white/10 shrink-0">
+              <Target className="w-6 h-6 text-amber-300" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">
+                  تحدي الأربعين
+                </span>
+                {activeFortyChallenge && (
+                  <span className="text-[10px] font-bold text-amber-200 font-mono">
+                    {activeFortyChallenge.completedDays?.length || 0} / 40 يوماً
+                  </span>
+                )}
+              </div>
+              <h3 className="text-sm font-black header-font leading-tight">
+                {activeFortyChallenge ? activeFortyChallenge.habitTitle : 'التزم بعادة 40 يوماً متواصلة'}
+              </h3>
+              <p className="text-[10px] text-amber-100/80 font-bold leading-relaxed">
+                {activeFortyChallenge 
+                  ? `أنجزت ${Math.min(100, Math.round(((activeFortyChallenge.completedDays?.length || 0) / 40) * 100))}% من التحدي. اضغط لمتابعة الأيام وتسجيل إنجاز اليوم!`
+                  : '«كتبت له براءتان: براءة من النار، وبراءة من النفاق» — رسخ طاعتك لتصبح سجية.'}
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => onSwitchTab('forty')} 
+            className="w-full sm:w-auto px-5 py-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-xl font-black text-xs header-font shadow-md transition-all active:scale-95 whitespace-nowrap"
+          >
+            {activeFortyChallenge ? 'متابعة التحدي' : 'ابدأ التحدي الآن'}
+          </button>
+        </div>
+      </div>
+
+      {/* قبس وتدبر اليوم القرآني */}
+      {todayTadabburSeed && (
+        <div className="bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 text-white rounded-[2rem] p-5 sm:p-6 shadow-md border border-emerald-500/20 relative overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-amber-400/20 text-amber-300 rounded-xl border border-amber-400/30">
+                <BookOpen className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="text-[9px] font-black text-emerald-300 uppercase block tracking-wider">
+                  Quran Tadabbur • قبس اليوم
+                </span>
+                <h4 className="text-xs font-black header-font text-white">
+                  سورة {todayTadabburSeed.surahName} [الآية {todayTadabburSeed.ayahNumber}]
+                </h4>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => onSwitchTab('quran')}
+              className="flex items-center gap-1.5 text-amber-300 hover:text-white font-bold text-xs header-font bg-white/10 hover:bg-emerald-600/60 px-3.5 py-1.5 rounded-xl border border-white/10 transition-all self-start sm:self-auto active:scale-95"
+            >
+              <span>محراب التدبر والتدوين</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="bg-white/5 rounded-2xl p-3 sm:p-4 border border-white/5 my-2">
+            <p className="quran-font text-sm sm:text-base text-center leading-loose text-amber-100/95">
+              ﴿ {todayTadabburSeed.ayahText} ﴾
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] text-emerald-200/80 pt-2 border-t border-white/10">
+            <span className="font-bold text-slate-300 leading-relaxed">
+              💡 {todayTadabburSeed.inspiration}
+            </span>
+            <span className="text-amber-300 font-bold shrink-0">
+              🎯 {todayTadabburSeed.suggestedAction}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* 2. الهدف اليومي */}
       <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
@@ -654,12 +757,26 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 6. مخطط التطور الأسبوعي (في النهاية) */}
       <div className="bg-white rounded-[2.5rem] p-7 shadow-sm border border-slate-100">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
              <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><History className="w-5 h-5" /></div>
-             <h3 className="text-sm font-bold text-slate-800 header-font">مخطط التطور الأسبوعي</h3>
+             <div>
+               <h3 className="text-sm font-bold text-slate-800 header-font leading-tight">مخطط التطور الأسبوعي</h3>
+               <p className="text-[10px] text-slate-400 font-bold">تتبع رصيدك الإيماني على مدار الأسبوع</p>
+             </div>
           </div>
-          <div className="text-[9px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">الخط يمثل هدفك اليومي</div>
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <button
+              onClick={() => setShowWeeklyCard(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 hover:from-emerald-500 hover:to-teal-700 text-white rounded-xl text-xs font-black header-font shadow-md shadow-emerald-900/20 active:scale-95 transition-all"
+            >
+              <Share className="w-3.5 h-3.5 text-amber-300" />
+              <span>بطاقة حصاد الأسبوع 🖼️</span>
+            </button>
+            <div className="text-[9px] font-black text-amber-600 bg-amber-50 px-2.5 py-2 rounded-lg border border-amber-100 hidden sm:block">
+              الخط يمثل هدفك اليومي
+            </div>
+          </div>
         </div>
         <div className="h-56 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -702,6 +819,16 @@ const Dashboard: React.FC<DashboardProps> = ({
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* مودال بطاقة الإنجاز الأسبوعي القابلة للمشاركة */}
+      <WeeklyCardModal
+        isOpen={showWeeklyCard}
+        onClose={() => setShowWeeklyCard(false)}
+        logs={logs}
+        weights={weights}
+        user={user || null}
+        targetScore={targetScore}
+      />
 
     </div>
   );

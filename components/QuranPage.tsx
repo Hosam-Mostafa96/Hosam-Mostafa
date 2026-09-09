@@ -27,6 +27,7 @@ import {
   Bookmark
 } from 'lucide-react';
 import { DailyLog, ReflectionNote } from '../types';
+import { QuranTadabbur } from './QuranTadabbur';
 
 const QURAN_PORTIONS_NAMES = [
   "1- الفاتحة: (الحمد لله رب العالمين)",
@@ -424,10 +425,6 @@ const QuranPage: React.FC<QuranPageProps> = ({ log, logs, plan, onUpdatePlan, on
   const [subTab, setSubTab] = useState<'hifz' | 'tadabbur'>('hifz');
   const [hifzUnit, setHifzUnit] = useState<'page' | 'rub'>('rub');
 
-  // تدبر القرآن
-  const [tadabburSurah, setTadabburSurah] = useState<string>("الفاتحة");
-  const [tadabburText, setTadabburText] = useState<string>("");
-
   useEffect(() => {
     const savedUnit = localStorage.getItem('worship_quran_unit') as 'page' | 'rub';
     if (savedUnit) setHifzUnit(savedUnit);
@@ -454,30 +451,6 @@ const QuranPage: React.FC<QuranPageProps> = ({ log, logs, plan, onUpdatePlan, on
 
   const updateReps = (val: number) => {
     onUpdateLog({ ...log, quran: { ...quranData, todayReps: Math.max(0, val) } });
-  };
-
-  // تدبر وتدوين
-  const handleAddReflection = () => {
-    if (!tadabburText.trim()) return;
-    const newReflection: ReflectionNote = {
-      id: `ref_${Date.now()}`,
-      text: `[سورة ${tadabburSurah}] ${tadabburText.trim()}`,
-      timestamp: Date.now()
-    };
-    const updatedLog = {
-      ...log,
-      reflections: [...(log.reflections || []), newReflection]
-    };
-    onUpdateLog(updatedLog);
-    setTadabburText("");
-  };
-
-  const handleDeleteReflection = (id: string) => {
-    const updatedLog = {
-      ...log,
-      reflections: (log.reflections || []).filter(r => r.id !== id)
-    };
-    onUpdateLog(updatedLog);
   };
 
   const currentIndex = useMemo(() => {
@@ -707,91 +680,12 @@ const QuranPage: React.FC<QuranPageProps> = ({ log, logs, plan, onUpdatePlan, on
           </div>
         </div>
       ) : (
-        /* محراب التدبر والتدوين التفاعلي */
-        <div className="space-y-6 animate-in slide-in-from-left duration-500">
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-            <div className="flex items-center gap-3 mb-4">
-              <Sparkles className="w-5 h-5 text-emerald-600" />
-              <div>
-                <h3 className="font-bold text-slate-800 header-font text-sm">محراب تدبر آيات القرآن</h3>
-                <p className="text-[10px] text-slate-400 font-bold">دوّن تأملاتك وفوائدك ومواعظك أثناء تلاوة كتاب الله</p>
-              </div>
-            </div>
-
-            {/* محرر تدوين الخواطر */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[10px] font-black text-slate-400 mb-1.5 header-font">اختر السورة المتدبرة:</label>
-                  <div className="relative">
-                    <select
-                      value={tadabburSurah}
-                      onChange={(e) => setTadabburSurah(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 pr-8 text-xs font-black header-font outline-none focus:border-emerald-500 text-slate-700"
-                    >
-                      {QURAN_SURAHS.map((s) => (
-                        <option key={s.id} value={s.name}>سورة {s.name}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 mb-1.5 header-font">اكتب خواطرك الإيمانية وتدبرك للآيات:</label>
-                <textarea
-                  value={tadabburText}
-                  onChange={(e) => setTadabburText(e.target.value)}
-                  placeholder="دوّن هنا أثراً لامس قلبك من السورة الكريمة، أو درساً عملية تنوي تطبيقه..."
-                  rows={4}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs font-bold leading-relaxed outline-none focus:border-emerald-500 transition-all text-slate-700"
-                ></textarea>
-              </div>
-
-              <button
-                onClick={handleAddReflection}
-                disabled={!tadabburText.trim()}
-                className="w-full py-3.5 bg-emerald-600 text-white rounded-xl font-black text-xs hover:bg-emerald-700 disabled:opacity-40 transition-all shadow-md flex items-center justify-center gap-2"
-              >
-                <Plus className="w-4 h-4" /> حفظ الخاطرة الإيمانية في السجل
-              </button>
-            </div>
-          </div>
-
-          {/* قائمة التدوينات السابقة لليوم */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-            <h4 className="text-xs font-black text-slate-800 header-font mb-4 flex items-center gap-2">
-              <MessageSquareText className="w-4 h-4 text-emerald-600" /> خواطر اليوم الإيمانية ({log.reflections?.length || 0})
-            </h4>
-
-            {(log.reflections || []).length > 0 ? (
-              <div className="space-y-3">
-                {log.reflections.map((ref) => (
-                  <div key={ref.id} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-3 justify-between">
-                    <div className="flex-1">
-                      <p className="text-xs text-slate-700 font-bold leading-relaxed">{ref.text}</p>
-                      <span className="text-[9px] text-slate-400 font-mono mt-2 block">
-                        {new Date(ref.timestamp).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteReflection(ref.id)}
-                      className="p-1 text-slate-300 hover:text-red-500 rounded-lg transition-all"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10 border border-dashed border-slate-200 rounded-2xl">
-                <Sparkles className="w-8 h-8 text-slate-300 mx-auto mb-2 animate-pulse" />
-                <p className="text-[10px] text-slate-400 font-bold">لا يوجد خواطر مدونة لليوم بعد. تلاوة القرآن بتدبر نور لقلبك وحياة لروحك!</p>
-              </div>
-            )}
-          </div>
-        </div>
+        /* محراب التدبر القرآني المتكامل */
+        <QuranTadabbur 
+          log={log} 
+          onUpdateLog={onUpdateLog} 
+          currentDate={log.date}
+        />
       )}
     </div>
   );

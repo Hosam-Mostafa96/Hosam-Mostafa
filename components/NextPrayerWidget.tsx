@@ -136,7 +136,7 @@ export const NextPrayerWidget: React.FC = () => {
     }).format(currentTime);
   } catch (e) {
     // fallback if not supported
-    formattedHijriStr = 'ذو الحجة ١٤٤٧ هـ';
+    formattedHijriStr = '١٤٤٨ هـ';
   }
 
   // Handle GPS location lookup

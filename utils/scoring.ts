@@ -83,10 +83,13 @@ export const calculateTotalScore = (log: DailyLog, weights: AppWeights = DEFAULT
     const sunnah = (weights.customSunnahs || []).find(s => s.id === id);
     return sum + (sunnah ? sunnah.points : 0);
   }, 0);
+
+  // نقاط التدبر القرآني (150 نقطة لكل وقفة تدبر موثقة مع نية عمل)
+  const tadabburPoints = (log.tadabburNotes || []).length * 150;
   
   const deductionMultiplier = 1 - (weights.burdenDeduction / 100);
   
-  const total = (prayers + quranHifzPoints + repsPoints + manualRevisionPoints + revisionRubPoints + quranTasksPoints + quranReadPagesPoints + knowledge + athkarCheck + athkarCount + detailedAthkarPoints + nawafilPrayers + fasting + customSunnahPoints + heartPoints + duasPoints) * (log.hasBurden ? deductionMultiplier : log.jihadFactor);
+  const total = (prayers + quranHifzPoints + repsPoints + manualRevisionPoints + revisionRubPoints + quranTasksPoints + quranReadPagesPoints + knowledge + athkarCheck + athkarCount + detailedAthkarPoints + nawafilPrayers + fasting + customSunnahPoints + heartPoints + duasPoints + tadabburPoints) * (log.hasBurden ? deductionMultiplier : log.jihadFactor);
 
   return Math.round(total);
 };

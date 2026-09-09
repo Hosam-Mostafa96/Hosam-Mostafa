@@ -126,6 +126,12 @@ export const MORNING_ATHKAR: AthkarItem[] = [
     text: 'سبحان الله وبحمده.',
     count: 100,
     virtue: 'من قالها مائة مرة حطت خطاياه وإن كانت مثل زبد البحر.'
+  },
+  {
+    id: 'm_18',
+    text: 'اللهم صلِّ وسلِّم على نبينا محمد.',
+    count: 10,
+    virtue: 'استحقاق شفاعة النبي يوم القيامة (قال رسول الله ﷺ: «من صلى علي حين يصبح عشراً وحين يمسي عشراً أدركته شفاعتي يوم القيامة»).'
   }
 ];
 
@@ -219,6 +225,12 @@ export const EVENING_ATHKAR: AthkarItem[] = [
     text: 'سبحان الله وبحمده.',
     count: 100,
     virtue: 'حط ورفع للخطايا والسيئات مهما بلغت كثرتها.'
+  },
+  {
+    id: 'e_16',
+    text: 'اللهم صلِّ وسلِّم على نبينا محمد.',
+    count: 10,
+    virtue: 'استحقاق شفاعة النبي يوم القيامة (قال رسول الله ﷺ: «من صلى علي حين يصبح عشراً وحين يمسي عشراً أدركته شفاعتي يوم القيامة»).'
   }
 ];
 
@@ -288,7 +300,12 @@ const AthkarRead: React.FC<AthkarReadProps> = ({ log, onUpdateLog }) => {
   const [activeTab, setActiveTab] = useState<'morning' | 'evening' | 'sleep'>('morning');
   const [showVirtues, setShowVirtues] = useState<Record<string, boolean>>({});
 
-  const listToUse = activeTab === 'morning' ? MORNING_ATHKAR : (activeTab === 'evening' ? EVENING_ATHKAR : SLEEP_ATHKAR);
+  const listToUse = activeTab === 'morning' 
+    ? MORNING_ATHKAR 
+    : activeTab === 'evening' 
+      ? EVENING_ATHKAR 
+      : SLEEP_ATHKAR;
+
   const detailedData = log.athkar.completedDetailedAthkar || {};
 
   const handleThikrTap = (id: string, maxCount: number) => {
@@ -308,8 +325,8 @@ const AthkarRead: React.FC<AthkarReadProps> = ({ log, onUpdateLog }) => {
       [id]: nextCount
     };
 
-    // حساب نسبة الإنجاز والمساندة لتعليم قائمتي (أذكار الصباح) أو (أذكار المساء) تلقائياً
-    const currentList = activeTab === 'morning' ? MORNING_ATHKAR : (activeTab === 'evening' ? EVENING_ATHKAR : SLEEP_ATHKAR);
+    // حساب نسبة الإنجاز والمساندة لتعليم قائمة الأذكار المعنية تلقائياً
+    const currentList = listToUse;
     const completedCountInList = currentList.filter(item => {
       // إما مكتمل تماماً في التحديث الجديد
       if (item.id === id) return nextCount >= item.count;
@@ -367,7 +384,8 @@ const AthkarRead: React.FC<AthkarReadProps> = ({ log, onUpdateLog }) => {
         }
       };
       
-      onUpdateLog(updatedLog, `صَفّر عدادات أذكار ${activeTab === 'morning' ? 'الصباح' : (activeTab === 'evening' ? 'المساء' : 'النوم')}`, 'athkar');
+      const tabName = activeTab === 'morning' ? 'الصباح' : (activeTab === 'evening' ? 'المساء' : 'النوم');
+      onUpdateLog(updatedLog, `صَفّر عدادات أذكار ${tabName}`, 'athkar');
     }
   };
 

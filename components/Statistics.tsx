@@ -23,8 +23,10 @@ import {
   Zap,
   GraduationCap,
   Star,
-  Timer
+  Timer,
+  Share2
 } from 'lucide-react';
+import { WeeklyCardModal } from './WeeklyCardModal';
 import { 
   ResponsiveContainer, 
   RadarChart, 
@@ -66,6 +68,16 @@ const Statistics: React.FC<StatisticsProps> = ({ user, logs, weights, books, las
   const [timeFilter, setTimeFilter] = useState<'week' | 'month' | 'all'>('month');
   const [activityFilter, setActivityFilter] = useState<ActivityType>('all');
   const [isExporting, setIsExporting] = useState(false);
+  const [showWeeklyCard, setShowWeeklyCard] = useState(false);
+
+  const targetScore = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('worship_target');
+      return saved ? parseInt(saved, 10) : 10000;
+    } catch (e) {
+      return 10000;
+    }
+  }, []);
 
   // تعريف تصنيفات العبادات للفلاتر
   const filterCategories = [
@@ -263,6 +275,37 @@ const Statistics: React.FC<StatisticsProps> = ({ user, logs, weights, books, las
         </div>
       </div>
 
+      {/* بطاقة الحصاد الأسبوعي للمشاركة */}
+      <div className="bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-900 border border-emerald-500/30 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="p-3 bg-amber-500/20 text-amber-300 rounded-2xl border border-amber-500/30 shrink-0">
+              <Share2 className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-[9px] font-black uppercase bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-400/30">
+                  إنفوجرافيك للمشاركة
+                </span>
+              </div>
+              <h3 className="text-sm font-black header-font text-white leading-tight">
+                بطاقة الإنجاز الأسبوعي القابلة للمشاركة 🖼️
+              </h3>
+              <p className="text-[10px] text-emerald-200/90 font-bold mt-1">
+                صمّم بطاقة فخمة بحصاد صلواتك، ختمتك، وأورادك الأسبوعية واحفظها كصورة أو شاركها مباشرة.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setShowWeeklyCard(true)}
+            className="w-full sm:w-auto px-5 py-3 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-2xl font-black text-xs header-font shadow-lg shadow-amber-950/40 transition-all active:scale-95 shrink-0 whitespace-nowrap"
+          >
+            توليد البطاقة الآن
+          </button>
+        </div>
+      </div>
+
       {/* خريطة الالتزام مع فلاتر محسنة */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
         <div className="flex items-center gap-2 mb-4">
@@ -332,6 +375,16 @@ const Statistics: React.FC<StatisticsProps> = ({ user, logs, weights, books, las
         <div className="flex items-center justify-between mb-4"><div className="flex items-center gap-2"><Target className="w-4 h-4 text-emerald-500" /><h3 className="font-bold text-slate-700 text-xs header-font">توازن المحراب</h3></div></div>
         <div className="h-64 w-full"><ResponsiveContainer width="100%" height="100%"><RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}><PolarGrid stroke="#f1f5f9" /><PolarAngleAxis dataKey="subject" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 700, fontFamily: 'Cairo' }} /><PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} /><Radar name="الأداء" dataKey="A" stroke="#10b981" fill="#10b981" fillOpacity={0.4} /></RadarChart></ResponsiveContainer></div>
       </div>
+
+      {/* مودال بطاقة الإنجاز الأسبوعي */}
+      <WeeklyCardModal
+        isOpen={showWeeklyCard}
+        onClose={() => setShowWeeklyCard(false)}
+        logs={logs}
+        weights={weights}
+        user={user}
+        targetScore={targetScore}
+      />
     </div>
   );
 };
