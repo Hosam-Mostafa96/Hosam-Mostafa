@@ -29,7 +29,8 @@ import {
   Frown,
   Ghost,
   CloudSun,
-  BookOpen
+  BookOpen,
+  Shield
 } from 'lucide-react';
 import { XAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ReferenceLine, YAxis } from 'recharts';
 import { format, addDays } from 'date-fns';
@@ -94,6 +95,35 @@ const Dashboard: React.FC<DashboardProps> = ({
     const day = new Date().getDate();
     return DAILY_TADABBUR_SEEDS[day % DAILY_TADABBUR_SEEDS.length];
   }, []);
+
+  const fortressOverview = useMemo(() => {
+    const prayers = log?.prayers || {};
+    const fardCount = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].filter(k => prayers[k]?.performed).length;
+    
+    const athkar = log?.athkar || { checklists: { morning: false, evening: false, sleep: false, travel: false }, counters: {} };
+    let athkarScore = 0;
+    if (athkar.checklists?.morning) athkarScore += 35;
+    if (athkar.checklists?.evening) athkarScore += 35;
+    if (athkar.checklists?.sleep) athkarScore += 20;
+    const counters = Object.values(athkar.counters || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+    if (counters > 0) athkarScore += 10;
+    const athkarPercent = Math.min(100, athkarScore);
+
+    const nawafil = log?.nawafil || { duhaDuration: 0, qiyamDuration: 0, witrDuration: 0, fasting: false };
+    const hasNawafil = (nawafil.duhaDuration || 0) > 0 || (nawafil.qiyamDuration || 0) > 0 || (log?.customSunnahIds?.length || 0) > 0 || !!nawafil.fasting;
+
+    const hasQuran = (log?.quran?.readPages?.length || 0) > 0 || (log?.quran?.hifzRub || 0) > 0 || (log?.tadabburNotes?.length || 0) > 0;
+
+    let totalScore = Math.round((fardCount / 5) * 50 + (athkarPercent / 100) * 25 + (hasNawafil ? 15 : 0) + (hasQuran ? 10 : 0));
+    totalScore = Math.min(100, totalScore);
+
+    let rank = 'بنيان في طور التأسيس';
+    if (totalScore >= 90) rank = 'حصن الصدّيقين المنيع 🏰';
+    else if (totalScore >= 70) rank = 'قلعة الأبرار المحصّنة 🛡️';
+    else if (totalScore >= 45) rank = 'صرح المجاهدة والارتقاء 🏛️';
+
+    return { fardCount, athkarPercent, hasNawafil, hasQuran, totalScore, rank };
+  }, [log]);
 
   // مراقبة وحفظ توقيت تسجيل العبادات التفاعلية المخصصة لرفع الايمان بدقة في ساعة التسجيل الفعلي
   useEffect(() => {
@@ -466,6 +496,71 @@ const Dashboard: React.FC<DashboardProps> = ({
 
       {/* 1. مواقيت الصلاة القادمة والعد التنازلي */}
       <NextPrayerWidget />
+
+      {/* قلعة الإيمان وبنيان اليوم الحي */}
+      <div className="bg-gradient-to-br from-slate-900 via-emerald-950 to-teal-950 text-white rounded-[2rem] p-6 shadow-xl relative overflow-hidden border border-emerald-500/30">
+        <div className="absolute top-0 right-0 w-44 h-44 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 w-36 h-36 bg-amber-400/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-white/10 rounded-2xl border border-white/15 text-amber-400 shadow-inner">
+                <Shield className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                    بنيان الإيمان الحي
+                  </span>
+                  <span className="text-[11px] font-bold text-amber-300 font-mono">
+                    {fortressOverview.totalScore}% اكتمال
+                  </span>
+                </div>
+                <h3 className="text-base font-black header-font leading-tight text-white mt-1">
+                  {fortressOverview.rank}
+                </h3>
+              </div>
+            </div>
+
+            <button
+              onClick={() => onSwitchTab('fortress')}
+              className="px-4 py-2 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 rounded-xl font-black text-xs header-font shadow-md transition-all active:scale-95 flex items-center gap-1.5 shrink-0"
+            >
+              <span>محراب القلعة</span>
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* شريط التحصين المصغر والعناصر الأربعة */}
+          <div className="grid grid-cols-4 gap-2 pt-2 border-t border-white/10 text-center">
+            <div className="bg-white/5 rounded-xl p-2 border border-white/10">
+              <p className="text-[9px] text-slate-300 font-bold">أبراج الفرائض</p>
+              <p className="text-xs font-black text-amber-300 font-mono mt-0.5">
+                {fortressOverview.fardCount} / 5
+              </p>
+            </div>
+            <div className="bg-white/5 rounded-xl p-2 border border-white/10">
+              <p className="text-[9px] text-slate-300 font-bold">درع الأذكار</p>
+              <p className="text-xs font-black text-emerald-300 font-mono mt-0.5">
+                {fortressOverview.athkarPercent}%
+              </p>
+            </div>
+            <div className="bg-white/5 rounded-xl p-2 border border-white/10">
+              <p className="text-[9px] text-slate-300 font-bold">شرفة النوافل</p>
+              <p className="text-xs font-black text-sky-300 font-mono mt-0.5">
+                {fortressOverview.hasNawafil ? 'مضاءة ✨' : 'بانتظارك'}
+              </p>
+            </div>
+            <div className="bg-white/5 rounded-xl p-2 border border-white/10">
+              <p className="text-[9px] text-slate-300 font-bold">مشكاة القرآن</p>
+              <p className="text-xs font-black text-purple-300 font-mono mt-0.5">
+                {fortressOverview.hasQuran ? 'عامرة 📖' : 'بانتظارك'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* 1.1. بطاقة أذكار اليوم التفاعلية */}
       <div className="bg-gradient-to-r from-emerald-800 via-emerald-900 to-teal-950 text-white rounded-[2rem] p-6 shadow-lg relative overflow-hidden">

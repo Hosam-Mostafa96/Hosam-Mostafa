@@ -307,10 +307,18 @@ const DailyEntry: React.FC<DailyEntryProps> = ({ log, onUpdate, weights, onUpdat
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {(['morning', 'evening', 'sleep', 'travel'] as const).map(id => {
-            const label = id === 'morning' ? 'أذكار الصباح' : id === 'evening' ? 'أذكار المساء' : id === 'sleep' ? 'أذكار النوم' : 'أذكار السفر';
-            return (<button key={id} onClick={() => updateSection('athkar', { checklists: { ...log.athkar.checklists, [id]: !log.athkar.checklists[id] } }, !log.athkar.checklists[id] ? `أتمَّ ${label}` : undefined, 'athkar')} className={`flex items-center justify-center gap-2 p-3 rounded-2xl border transition-all ${log.athkar.checklists[id] ? 'bg-emerald-600 text-white border-emerald-600 shadow-md' : 'bg-slate-50 text-slate-400 border-slate-100'}`}><span className="text-xs font-bold">{label.split(' ')[1]}</span></button>);
+        <div className="grid grid-cols-3 gap-2.5 mb-6">
+          {(['morning', 'evening', 'sleep'] as const).map(id => {
+            const label = id === 'morning' ? 'أذكار الصباح' : id === 'evening' ? 'أذكار المساء' : 'أذكار النوم';
+            return (
+              <button 
+                key={id} 
+                onClick={() => updateSection('athkar', { checklists: { ...log.athkar.checklists, [id]: !log.athkar.checklists[id] } }, !log.athkar.checklists[id] ? `أتمَّ ${label}` : undefined, 'athkar')} 
+                className={`flex items-center justify-center p-3 rounded-2xl border transition-all ${log.athkar.checklists[id] ? 'bg-emerald-600 text-white border-emerald-600 shadow-md font-black' : 'bg-slate-50 text-slate-400 border-slate-100 font-bold'}`}
+              >
+                <span className="text-xs">{label.split(' ')[1]}</span>
+              </button>
+            );
           })}
         </div>
 

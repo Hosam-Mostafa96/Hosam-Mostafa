@@ -117,7 +117,7 @@ export interface DailyLog {
   };
   knowledge: { shariDuration: number; readingDuration: number; readingPages?: number };
   athkar: {
-    checklists: { morning: boolean; evening: boolean; sleep: boolean; travel: boolean };
+    checklists: { morning: boolean; evening: boolean; sleep: boolean; travel?: boolean };
     counters: Record<string, number>;
     completedDetailedAthkar?: Record<string, number>;
   };
