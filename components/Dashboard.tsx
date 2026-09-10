@@ -98,7 +98,16 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const fortressOverview = useMemo(() => {
     const prayers = log?.prayers || {};
-    const fardCount = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].filter(k => prayers[k]?.performed).length;
+    const getPrayerDone = (arKey: string, enKey: string) => {
+      return Boolean(prayers[arKey]?.performed || prayers[enKey]?.performed);
+    };
+    const fardCount = [
+      getPrayerDone(PrayerName.FAJR, 'fajr'),
+      getPrayerDone(PrayerName.DHUHR, 'dhuhr'),
+      getPrayerDone(PrayerName.ASR, 'asr'),
+      getPrayerDone(PrayerName.MAGHRIB, 'maghrib'),
+      getPrayerDone(PrayerName.ISHA, 'isha'),
+    ].filter(Boolean).length;
     
     const athkar = log?.athkar || { checklists: { morning: false, evening: false, sleep: false, travel: false }, counters: {} };
     let athkarScore = 0;
@@ -106,13 +115,15 @@ const Dashboard: React.FC<DashboardProps> = ({
     if (athkar.checklists?.evening) athkarScore += 35;
     if (athkar.checklists?.sleep) athkarScore += 20;
     const counters = Object.values(athkar.counters || {}).reduce((a, b) => a + (Number(b) || 0), 0);
-    if (counters > 0) athkarScore += 10;
+    const detailedCount = Object.values(log?.athkar?.completedDetailedAthkar || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+    if (counters > 0 || detailedCount > 0) athkarScore += 10;
     const athkarPercent = Math.min(100, athkarScore);
 
     const nawafil = log?.nawafil || { duhaDuration: 0, qiyamDuration: 0, witrDuration: 0, fasting: false };
-    const hasNawafil = (nawafil.duhaDuration || 0) > 0 || (nawafil.qiyamDuration || 0) > 0 || (log?.customSunnahIds?.length || 0) > 0 || !!nawafil.fasting;
+    const surroundingList = (Object.values(prayers) as PrayerEntry[]).flatMap(p => p?.surroundingSunnahIds || []);
+    const hasNawafil = (nawafil.duhaDuration || 0) > 0 || (nawafil.qiyamDuration || 0) > 0 || (nawafil.witrDuration || 0) > 0 || (log?.customSunnahIds?.length || 0) > 0 || surroundingList.length > 0 || !!nawafil.fasting;
 
-    const hasQuran = (log?.quran?.readPages?.length || 0) > 0 || (log?.quran?.hifzRub || 0) > 0 || (log?.tadabburNotes?.length || 0) > 0;
+    const hasQuran = (log?.quran?.readPages?.length || 0) > 0 || (log?.quran?.hifzRub || 0) > 0 || (log?.quran?.revisionRub || 0) > 0 || (log?.tadabburNotes?.length || 0) > 0 || !!log?.quran?.surahName || (log?.quran?.todayPortion && log?.quran?.todayPortion.length > 0);
 
     let totalScore = Math.round((fardCount / 5) * 50 + (athkarPercent / 100) * 25 + (hasNawafil ? 15 : 0) + (hasQuran ? 10 : 0));
     totalScore = Math.min(100, totalScore);

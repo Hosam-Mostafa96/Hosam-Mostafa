@@ -278,7 +278,7 @@ const App: React.FC = () => {
       case 'subha': return <Subha log={currentLog} onUpdateLog={updateLog} />;
       case 'athkar': return <AthkarRead log={currentLog} onUpdateLog={updateLog} />;
       case 'forty': return <FortyChallenge />;
-      case 'fortress': return <FortressOfFaith log={currentLog} onSwitchTab={setActiveTab} user={user} />;
+      case 'fortress': return <FortressOfFaith log={currentLog} onSwitchTab={setActiveTab} user={user} onUpdateLog={updateLog} />;
       case 'quran': return <QuranPage log={currentLog} logs={logs} plan="new_1" onUpdatePlan={() => {}} onUpdateLog={updateLog} />;
       case 'library': return <BookLibrary books={books} onAddBook={handleAddBook} onDeleteBook={handleDeleteBook} onUpdateProgress={(id, pages) => { const b = books.find(x => x.id === id); if(b) handleUpdateBookProgress(b, pages); }} />;
       case 'stats': return <Statistics user={user} logs={logs} weights={weights} books={books} lastSyncTime={lastCloudSync} onManualSync={(f) => syncToCloud(logs, books, f)} />;

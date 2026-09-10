@@ -24,9 +24,10 @@ import {
   Ruler,
   TowerControl,
   Waves,
-  Palette
+  Palette,
+  Users
 } from 'lucide-react';
-import { DailyLog, User } from '../types';
+import { DailyLog, User, PrayerName, PrayerEntry } from '../types';
 import confetti from 'canvas-confetti';
 
 interface FortressOfFaithProps {
@@ -34,6 +35,7 @@ interface FortressOfFaithProps {
   onSwitchTab?: (tab: any) => void;
   user?: User | null;
   onClose?: () => void;
+  onUpdateLog?: (log: DailyLog, activityLabel?: string, activityType?: string) => void;
 }
 
 export type FortressSection = 
@@ -54,7 +56,7 @@ export type FortressSection =
   | 'tazkiya_gardens'
   | 'remembrance_moat';
 
-export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchTab, user, onClose }) => {
+export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchTab, user, onClose, onUpdateLog }) => {
   const [activeSection, setActiveSection] = useState<FortressSection | null>(null);
   const [hoveredSection, setHoveredSection] = useState<FortressSection | null>(null);
   const [isSimulation, setIsSimulation] = useState<boolean>(false);
@@ -84,12 +86,19 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
         isha: { performed: true, inCongregation: true },
       };
     }
+    const getPrayer = (arKey: string, enKey: string) => {
+      const p = prayers[arKey] || prayers[enKey] || prayers[enKey.toLowerCase()] || prayers[enKey.toUpperCase()] || {};
+      return {
+        performed: Boolean(p.performed),
+        inCongregation: Boolean(p.inCongregation)
+      };
+    };
     return {
-      fajr: prayers.fajr || { performed: false, inCongregation: false },
-      dhuhr: prayers.dhuhr || { performed: false, inCongregation: false },
-      asr: prayers.asr || { performed: false, inCongregation: false },
-      maghrib: prayers.maghrib || { performed: false, inCongregation: false },
-      isha: prayers.isha || { performed: false, inCongregation: false },
+      fajr: getPrayer(PrayerName.FAJR, 'fajr'),
+      dhuhr: getPrayer(PrayerName.DHUHR, 'dhuhr'),
+      asr: getPrayer(PrayerName.ASR, 'asr'),
+      maghrib: getPrayer(PrayerName.MAGHRIB, 'maghrib'),
+      isha: getPrayer(PrayerName.ISHA, 'isha'),
     };
   }, [isSimulation, prayers]);
 
@@ -114,19 +123,21 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
     if (isSimulation) {
       return { morning: true, evening: true, sleep: true, counters: 300, totalPercent: 100 };
     }
-    const morning = !!athkar.checklists?.morning;
-    const evening = !!athkar.checklists?.evening;
-    const sleep = !!athkar.checklists?.sleep;
+    const morning = Boolean(athkar.checklists?.morning);
+    const evening = Boolean(athkar.checklists?.evening);
+    const sleep = Boolean(athkar.checklists?.sleep);
     const countersSum = Object.values(athkar.counters || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+    const detailedSum = Object.values(athkar.completedDetailedAthkar || {}).reduce((a, b) => a + (Number(b) || 0), 0);
+    const totalCounters = countersSum + detailedSum;
     
     let score = 0;
     if (morning) score += 35;
     if (evening) score += 35;
     if (sleep) score += 20;
-    if (countersSum >= 100) score += 10;
-    else if (countersSum > 0) score += 5;
+    if (totalCounters >= 100) score += 10;
+    else if (totalCounters > 0) score += 5;
 
-    return { morning, evening, sleep, counters: countersSum, totalPercent: Math.min(100, score) };
+    return { morning, evening, sleep, counters: totalCounters, totalPercent: Math.min(100, score) };
   }, [isSimulation, athkar]);
 
   // 4. حالة النوافل
@@ -136,10 +147,13 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
     }
     const duha = (nawafil.duhaDuration || 0) > 0;
     const qiyam = (nawafil.qiyamDuration || 0) > 0 || (nawafil.witrDuration || 0) > 0;
-    const rawatib = (log?.customSunnahIds?.length || 0) > 0;
-    const fasting = !!nawafil.fasting;
+    const rawatibIds = ['fajr_pre', 'dhuhr_pre', 'dhuhr_post', 'maghrib_post', 'isha_post'];
+    const surroundingList = (Object.values(prayers) as PrayerEntry[]).flatMap(p => p?.surroundingSunnahIds || []);
+    const hasRawatibFromPrayers = surroundingList.some((id: string) => rawatibIds.includes(id));
+    const rawatib = hasRawatibFromPrayers || (log?.customSunnahIds?.length || 0) > 0 || surroundingList.length > 0;
+    const fasting = Boolean(nawafil.fasting);
     return { duha, qiyam, rawatib, fasting };
-  }, [isSimulation, nawafil, log?.customSunnahIds]);
+  }, [isSimulation, nawafil, log?.customSunnahIds, prayers]);
 
   // 5. حالة القرآن الكريم وأشعة شمس الوحي
   const quranData = useMemo(() => {
@@ -164,12 +178,15 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
     const hifzReps = quran.todayReps || 0;
     const hasTadabbur = tadabburCount > 0;
     const hasListenTask = quran.tasksCompleted?.includes('listen') || false;
+    const hasSurah = Boolean(quran.surahName && quran.surahName.trim().length > 0);
+    const hasPortion = Boolean(quran.todayPortion && quran.todayPortion.trim().length > 0);
 
     // حساب النسبة المئوية لقوة أشعة القرآن (من 0 إلى 100%)
     // 1. التلاوة والقراءة (تصل إلى 40%)
     let recitationScore = 0;
     if (pagesCount > 0) recitationScore += Math.min(40, pagesCount * 8); // كل صفحة 8% (5 صفحات تلاوة = 40%)
     if (readingRub > 0) recitationScore = Math.max(recitationScore, Math.min(40, readingRub * 10)); // كل ربع قراءة 10%
+    if (hasSurah || hasPortion) recitationScore = Math.max(recitationScore, 20);
 
     // 2. الاستماع والسماع (تصل إلى 30%)
     let listeningScore = 0;
@@ -187,12 +204,13 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
 
     const totalRaw = recitationScore + listeningScore + hifzScore + tadabburScore;
     const percent = Math.min(100, Math.max(0, Math.round(totalRaw)));
-    const hasRead = pagesCount > 0 || readingRub > 0 || listeningRub > 0 || percent > 0;
+    const hasRead = pagesCount > 0 || readingRub > 0 || listeningRub > 0 || hasSurah || percent > 0;
 
     const summaryParts: string[] = [];
     if (pagesCount > 0) summaryParts.push(`تلاوة ${pagesCount} صفحة`);
     if (readingRub > 0) summaryParts.push(`قراءة ${readingRub} أرباع`);
     if (listeningRub > 0 || hasListenTask) summaryParts.push(`سماع ${listeningRub > 0 ? `${listeningRub} أرباع` : 'مجوّد'}`);
+    if (hasSurah) summaryParts.push(`سورة ${quran.surahName}`);
     if (quran.todayPortion || hifzTasksCount > 0) summaryParts.push(`حفظ ومراجعة (${hifzTasksCount} مهام)`);
     if (hasTadabbur) summaryParts.push(`تدبر ${tadabburCount} آيات`);
 
@@ -1454,6 +1472,56 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
     }
   };
 
+  const prayerKeyMap: Record<string, { key: PrayerName; label: string }> = {
+    fajr: { key: PrayerName.FAJR, label: 'صلاة الفجر' },
+    dhuhr: { key: PrayerName.DHUHR, label: 'صلاة الظهر' },
+    asr: { key: PrayerName.ASR, label: 'صلاة العصر' },
+    maghrib: { key: PrayerName.MAGHRIB, label: 'صلاة المغرب' },
+    isha: { key: PrayerName.ISHA, label: 'صلاة العشاء' },
+  };
+
+  const handleQuickTogglePrayer = (prayerKey: PrayerName, inCongregation: boolean) => {
+    if (!onUpdateLog) return;
+    const currentEntry = prayers[prayerKey] || (prayers as any)[prayerKey] || {};
+    const isCurrentlyPerformed = Boolean(currentEntry.performed);
+    const isSameCong = Boolean(currentEntry.inCongregation) === inCongregation;
+
+    let updatedEntry: PrayerEntry;
+    if (isCurrentlyPerformed && isSameCong) {
+      // إلغاء التحديد
+      updatedEntry = {
+        ...currentEntry,
+        performed: false,
+        inCongregation: false
+      };
+    } else {
+      updatedEntry = {
+        ...currentEntry,
+        performed: true,
+        inCongregation
+      };
+      confetti({
+        particleCount: 45,
+        spread: 55,
+        origin: { y: 0.7 }
+      });
+    }
+
+    const updatedLog: DailyLog = {
+      ...log,
+      prayers: {
+        ...log.prayers,
+        [prayerKey]: updatedEntry
+      }
+    };
+
+    onUpdateLog(
+      updatedLog,
+      updatedEntry.performed ? `أتمَّ ${prayerKey}${inCongregation ? ' (جماعة)' : ''}` : undefined,
+      'prayer'
+    );
+  };
+
   // تصدير كصورة PNG مباشرة وفورية من الـ Canvas
   const handleExportCanvasImage = () => {
     const canvas = canvasRef.current;
@@ -1834,6 +1902,56 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
                 {sectionDetails[activeSection].hadith}
               </p>
             </div>
+
+            {/* أزرار التسجيل السريع المباشر لبرج الصلاة إذا كان فريضة */}
+            {['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'].includes(activeSection) && prayerKeyMap[activeSection] && onUpdateLog && (
+              <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-3.5 rounded-2xl border border-emerald-200/80 space-y-2 mt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black text-emerald-900 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+                    تسجيل فوري لرفع البرج في القلعة:
+                  </span>
+                  <span className="text-[10px] text-emerald-700 font-bold">
+                    {fardData[activeSection as keyof typeof fardData]?.performed ? '✓ مشيّد الآن' : 'غير مشيّد بعد'}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handleQuickTogglePrayer(prayerKeyMap[activeSection].key, false)}
+                    className={`flex-1 min-w-[110px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 ${
+                      fardData[activeSection as keyof typeof fardData]?.performed && !fardData[activeSection as keyof typeof fardData]?.inCongregation
+                        ? 'bg-emerald-600 text-white font-black ring-2 ring-emerald-400'
+                        : 'bg-white text-slate-700 border border-emerald-200 hover:bg-emerald-50'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>أديتها (منفرد)</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleQuickTogglePrayer(prayerKeyMap[activeSection].key, true)}
+                    className={`flex-1 min-w-[110px] py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm active:scale-95 ${
+                      fardData[activeSection as keyof typeof fardData]?.performed && fardData[activeSection as keyof typeof fardData]?.inCongregation
+                        ? 'bg-amber-500 text-white font-black ring-2 ring-amber-300'
+                        : 'bg-white text-slate-700 border border-amber-200 hover:bg-amber-50'
+                    }`}
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-500" />
+                    <span>أديتها (جماعة 👑)</span>
+                  </button>
+
+                  {fardData[activeSection as keyof typeof fardData]?.performed && (
+                    <button
+                      onClick={() => handleQuickTogglePrayer(prayerKeyMap[activeSection].key, fardData[activeSection as keyof typeof fardData]?.inCongregation)}
+                      className="py-2 px-2.5 rounded-xl text-[11px] font-bold bg-white text-rose-500 border border-rose-200 hover:bg-rose-50 transition-all"
+                      title="إلغاء تسجيل الصلاة"
+                    >
+                      إلغاء التحديد
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-3">
