@@ -21,7 +21,6 @@ import {
   Compass,
   Layers,
   Award,
-  Ruler,
   TowerControl,
   Waves,
   Palette,
@@ -51,7 +50,7 @@ export type FortressSection =
   | 'duha_dome' 
   | 'rawatib' 
   | 'quran_light' 
-  | 'quran_sunrays'
+  | 'quran_sunrays' 
   | 'fasting_gate' 
   | 'tazkiya_gardens'
   | 'remembrance_moat';
@@ -62,7 +61,6 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
   const [isSimulation, setIsSimulation] = useState<boolean>(false);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const [showShareToast, setShowShareToast] = useState<boolean>(false);
-  const [showDimensionsInspector, setShowDimensionsInspector] = useState<boolean>(true);
   
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
@@ -121,7 +119,7 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
   // 3. حالة الأذكار والتحصين
   const athkarShield = useMemo(() => {
     if (isSimulation) {
-      return { morning: true, evening: true, sleep: true, counters: 300, totalPercent: 100 };
+      return { morning: true, evening: true, sleep: true, counters: 500, totalPercent: 100 };
     }
     const morning = Boolean(athkar.checklists?.morning);
     const evening = Boolean(athkar.checklists?.evening);
@@ -265,21 +263,21 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
     architecturalEffect: string;
   }> = {
     fajr: {
-      title: 'برج صلاة الفجر (منارة النور التام)',
-      subtitle: 'البرج الحصين في الجناح الشرقي للقلعة',
+      title: 'الصرح الأعظم: برج صلاة الفجر (منارة النور التام)',
+      subtitle: 'العماد الأوسط والقلعة الحصينة الكبرى في قلب الحصن',
       statusText: fardData.fajr.performed 
-        ? (fardData.fajr.inCongregation ? 'مشيّد بارتفاع كامل (226م) مع تاج الجماعة النوراني ⭐' : 'مشيّد بارتفاع (190م)')
+        ? (fardData.fajr.inCongregation ? 'شامخ في كبد السماء بارتفاع (296م) مع قبة فجرية ملكية وتاج الجماعة ⭐' : 'مشيّد بارتفاع (260م)')
         : 'أساس أرضي فقط (24م) — بانتظار إقامة الفريضة',
       isBuilt: fardData.fajr.performed,
       spiritualMeaning: 'من صلى الصبح فهو في ذمة الله؛ صلاة الفجر تؤسس حجر الأساس لطرد وحشة الظلمة.',
       hadith: '«بَشِّرِ الْمَشَّائِينَ فِي الظُّلَمِ إِلَى الْمَسَاجِدِ بِالنُّورِ التَّامِّ يَوْمَ الْقِيَامَةِ»',
       actionLabel: 'تسجيل صلاة الفجر',
       tabTarget: 'entry',
-      architecturalEffect: 'يرفع البرج الشرقي الأيسر من 24م إلى 226م مع شرفة إسلامية ونوافذ فجرية زرقاء مشعة.'
+      architecturalEffect: 'يشيد الصرح المركزي الأعظم وترتفع القبة الفجرية المشعة مع شرفة ونوافذ المشربية الفجرية.'
     },
     dhuhr: {
       title: 'برج صلاة الظهر (عماد منتصف النهار)',
-      subtitle: 'البرج الداخلي الأيسر الحامي لقلب القلعة',
+      subtitle: 'البرج الأيمن الداخلي الحامي لقلب القلعة (يليه الظهر)',
       statusText: fardData.dhuhr.performed 
         ? (fardData.dhuhr.inCongregation ? 'مشيّد بارتفاع (256م) وشرفة ذهبية للجماعة ⭐' : 'مشيّد بارتفاع (220م)')
         : 'أساس أرضي فقط — بانتظار إقامة الفريضة',
@@ -288,24 +286,24 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
       hadith: '«إنها ساعة تُفتح فيها أبواب السماء، فأحب أن يصعد لي فيها عمل صالح»',
       actionLabel: 'تسجيل صلاة الظهر',
       tabTarget: 'entry',
-      architecturalEffect: 'يرتفع البرج الأوسط الأيسر ويعلو صرحه مع شرفة وقبة إسلامية متوهجة بضياء الظهيرة.'
+      architecturalEffect: 'يرتفع البرج الأيمن الداخلي ويعلو صرحه مع شرفة وقبة إسلامية متوهجة بضياء الظهيرة.'
     },
     asr: {
       title: 'برج صلاة العصر (الصلاة الوسطى)',
-      subtitle: 'البرج الداخلي الأيمن المنيع',
+      subtitle: 'البرج الأيمن الخارجي المنيع (ثم العصر)',
       statusText: fardData.asr.performed 
-        ? (fardData.asr.inCongregation ? 'مشيّد بارتفاع (256م) ومضاء بتاج الجماعة ⭐' : 'مشيّد بارتفاع (220م)')
+        ? (fardData.asr.inCongregation ? 'مشيّد بارتفاع (226م) ومضاء بتاج الجماعة ⭐' : 'مشيّد بارتفاع (190م)')
         : 'أساس أرضي فقط — بانتظار إقامة الفريضة',
       isBuilt: fardData.asr.performed,
       spiritualMeaning: 'حفظ العصر حفظ لتاج العمل؛ من تركها حبط عمله كأنما وُتر أهله وماله.',
       hadith: '«مَنْ صَلَّى الْبَرْدَيْنِ دَخَلَ الْجَنَّةَ» — (الفجر والعصر)',
       actionLabel: 'تسجيل صلاة العصر',
       tabTarget: 'entry',
-      architecturalEffect: 'يشيد البرج الأوسط الأيمن ليحقق التوازن الهيكلي الدفاعي لأسوار القلعة الذهبية.'
+      architecturalEffect: 'يشيد البرج الأيمن الخارجي ليحقق التوازن الهيكلي الدفاعي لأسوار القلعة الذهبية.'
     },
     maghrib: {
       title: 'برج صلاة المغرب (أفق الغروب)',
-      subtitle: 'البرج الحصين في الجناح الغربي للقلعة',
+      subtitle: 'البرج الحصين في أقصى الشمال/اليسار',
       statusText: fardData.maghrib.performed 
         ? (fardData.maghrib.inCongregation ? 'مشيّد بارتفاع كامل (226م) مع تاج صلاة الجماعة ⭐' : 'مشيّد بارتفاع (190م)')
         : 'أساس أرضي فقط — بانتظار إقامة الفريضة',
@@ -314,20 +312,20 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
       hadith: '«لا تزال أمتي بخير ما لم يؤخروا المغرب حتى تشتبك النجوم»',
       actionLabel: 'تسجيل صلاة المغرب',
       tabTarget: 'entry',
-      architecturalEffect: 'يرفع البرج الغربي الأيمن ويتوج بقبة الغروب ذات اللون البرتقالي العنبري الدافئ.'
+      architecturalEffect: 'يرفع البرج الأيسر الخارجي ويتوج بقبة الغروب ذات اللون البرتقالي العنبري الدافئ.'
     },
     isha: {
-      title: 'الصرح الأعظم: برج صلاة العشاء (القصر الإيماني الأكبر)',
-      subtitle: 'العماد الأوسط والقلعة الحصينة الكبرى',
+      title: 'برج صلاة العشاء (سكينة الليل والظلمة)',
+      subtitle: 'البرج الداخلي الأيسر على الشمال (تليه العشاء)',
       statusText: fardData.isha.performed 
-        ? (fardData.isha.inCongregation ? 'شامخ في كبد السماء بارتفاع (296م) وقبة ذهبية ملكية ⭐' : 'مشيّد بارتفاع (260م)')
+        ? (fardData.isha.inCongregation ? 'شامخ بارتفاع (256م) وقبة لؤلؤية ملكية ⭐' : 'مشيّد بارتفاع (220م)')
         : 'أساس أرضي فقط — بانتظار إقامة الفريضة',
       isBuilt: fardData.isha.performed,
-      spiritualMeaning: 'صلاة العشاء في جماعة تعدل قيام نصف الليل، وهي النواة الصلبة التي يقوم عليها قلب الحصن.',
+      spiritualMeaning: 'صلاة العشاء في جماعة تعدل قيام نصف الليل، ونور يضيء حلكة الظلمات.',
       hadith: '«من صلى العشاء في جماعة فكأنما قام نصف الليل»',
       actionLabel: 'تسجيل صلاة العشاء',
       tabTarget: 'entry',
-      architecturalEffect: 'يشيد الصرح المركزي الأعظم وترتفع القبة الإسلامية الذهبية مع نوافذ المشربية الثلاثية.'
+      architecturalEffect: 'يشيد البرج الأيسر الداخلي وترتفع القبة الإسلامية اللؤلؤية مع نوافذ العشاء المضيئة.'
     },
     main_curtain_wall: {
       title: 'السور الحجري الرئيسي وشرفات المداميك',
@@ -457,14 +455,14 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
       title: 'خندق الاستغفار والتسبيح الرقراق (حاجز الغفلة)',
       subtitle: 'قناة مائية رقراقة تحيط بأسوار القلعة السفلية',
       statusText: athkarShield.counters > 0 
-        ? `ممتلئ بالماء بنسبة ${Math.min(100, Math.round((athkarShield.counters / 150) * 100))}% (${athkarShield.counters.toLocaleString()} ذكراً) 🌊`
-        : 'خندق جاف — أدر السبحة ليفيض الخندق بالماء العذب',
+        ? `ممتلئ بالماء بنسبة ${Math.min(100, Math.round((athkarShield.counters / 500) * 100))}% (${athkarShield.counters.toLocaleString()} ذكراً من ٥٠٠) 🌊`
+        : 'خندق جاف — أدر السبحة ليفيض الخندق بالماء العذب (يمتلئ عند ٥٠٠ تسبيحة)',
       isBuilt: athkarShield.counters > 0,
       spiritualMeaning: 'الاستغفار والتسبيح يطهر النفس ويشكل خندقاً يعجز إبليس وجنده عن اجتيازه.',
       hadith: '«كلمتان خفيفتان على اللسان ثقيلتان في الميزان حبيبتان إلى الرحمن: سبحان الله وبحمده سبحان الله العظيم»',
       actionLabel: 'فتح السبحة الإلكترونية',
       tabTarget: 'subha',
-      architecturalEffect: 'يرتفع منسوب المياه الزرقاء الرقراقة المتلألئة في الخندق المحيط مع كل تسبيحة.'
+      architecturalEffect: 'يرتفع منسوب المياه الزرقاء الرقراقة المتلألئة في الخندق المحيط مع كل تسبيحة حتى يمتلئ تماماً عند ٥٠٠ تسبيحة.'
     }
   };
 
@@ -818,7 +816,7 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
     ctx.closePath();
     ctx.fill();
 
-    const moatFillRatio = Math.min(1, athkarShield.counters / 150);
+    const moatFillRatio = Math.min(1, athkarShield.counters / 500);
     if (moatFillRatio > 0) {
       const waterY = 515 - Math.round(moatFillRatio * 18);
       const waterGrad = ctx.createLinearGradient(0, waterY, 0, 550);
@@ -1273,47 +1271,13 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
       ctx.restore();
     };
 
-    // رسم الأبراج الخمسة
-    // 1. الفجر (يسار: x = 110, w = 68)
-    drawTower(
-      'fajr',
-      110,
-      68,
-      fardData.fajr.performed ? (fardData.fajr.inCongregation ? 226 : 190) : 190,
-      fardData.fajr.performed,
-      fardData.fajr.inCongregation,
-      'الفجر',
-      '#38bdf8'
-    );
+    // رسم الأبراج الخمسة بحسب الترتيب المطلوب:
+    // الفجر فى المنتصف يليه الظهر ثم العصر، وعلى الشمال المغرب تليه العشاء
 
-    // 2. الظهر (يسار الوسط: x = 235, w = 72)
-    drawTower(
-      'dhuhr',
-      235,
-      72,
-      fardData.dhuhr.performed ? (fardData.dhuhr.inCongregation ? 256 : 220) : 220,
-      fardData.dhuhr.performed,
-      fardData.dhuhr.inCongregation,
-      'الظهر',
-      '#fde047'
-    );
-
-    // 3. العصر (يمين الوسط: x = 553, w = 72)
-    drawTower(
-      'asr',
-      553,
-      72,
-      fardData.asr.performed ? (fardData.asr.inCongregation ? 256 : 220) : 220,
-      fardData.asr.performed,
-      fardData.asr.inCongregation,
-      'العصر',
-      '#fbbf24'
-    );
-
-    // 4. المغرب (يمين: x = 682, w = 68)
+    // 1. المغرب (أقصى الشمال/اليسار: x = 110, w = 68)
     drawTower(
       'maghrib',
-      682,
+      110,
       68,
       fardData.maghrib.performed ? (fardData.maghrib.inCongregation ? 226 : 190) : 190,
       fardData.maghrib.performed,
@@ -1322,17 +1286,53 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
       '#fb923c'
     );
 
-    // 5. العشاء — الصرح المركزي الأكبر (وسط: x = 365, w = 130)
+    // 2. العشاء (شمال/يسار الوسط تليه العشاء: x = 235, w = 72)
     drawTower(
       'isha',
-      365,
-      130,
-      fardData.isha.performed ? (fardData.isha.inCongregation ? 296 : 260) : 260,
+      235,
+      72,
+      fardData.isha.performed ? (fardData.isha.inCongregation ? 256 : 220) : 220,
       fardData.isha.performed,
       fardData.isha.inCongregation,
       'العشاء',
-      '#fef08a',
+      '#fef08a'
+    );
+
+    // 3. الفجر — الصرح المركزي الأكبر (في المنتصف: x = 365, w = 130)
+    drawTower(
+      'fajr',
+      365,
+      130,
+      fardData.fajr.performed ? (fardData.fajr.inCongregation ? 296 : 260) : 260,
+      fardData.fajr.performed,
+      fardData.fajr.inCongregation,
+      'الفجر',
+      '#38bdf8',
       true
+    );
+
+    // 4. الظهر (يمين الوسط يليه الظهر: x = 553, w = 72)
+    drawTower(
+      'dhuhr',
+      553,
+      72,
+      fardData.dhuhr.performed ? (fardData.dhuhr.inCongregation ? 256 : 220) : 220,
+      fardData.dhuhr.performed,
+      fardData.dhuhr.inCongregation,
+      'الظهر',
+      '#fde047'
+    );
+
+    // 5. العصر (أقصى اليمين ثم العصر: x = 682, w = 68)
+    drawTower(
+      'asr',
+      682,
+      68,
+      fardData.asr.performed ? (fardData.asr.inCongregation ? 226 : 190) : 190,
+      fardData.asr.performed,
+      fardData.asr.inCongregation,
+      'العصر',
+      '#fbbf24'
     );
 
     // 6. ذرات النور والبركة العائمة والضياء الشامل لأشعة شمس القرآن (تغمر كامل البنيان)
@@ -1414,20 +1414,20 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
     if (y >= 490 && y <= 550) return 'remembrance_moat';
     // بوابة الريان
     if (x >= 385 && x <= 475 && y >= 360 && y <= 470) return 'fasting_gate';
-    // برج العشاء (المركزي)
-    if (x >= 365 && x <= 495 && y >= 170 && y <= 470) return 'isha';
+    // برج الفجر (المركزي في المنتصف)
+    if (x >= 365 && x <= 495 && y >= 170 && y <= 470) return 'fajr';
     // منارة القيام
     if (nawafilData.qiyam && x >= 330 && x <= 370 && y >= 75 && y <= 340) return 'qiyam_spire';
     // قبة الضحى
     if (nawafilData.duha && x >= 485 && x <= 535 && y >= 180 && y <= 245) return 'duha_dome';
-    // برج الظهر
-    if (x >= 235 && x <= 307 && y >= 210 && y <= 470) return 'dhuhr';
-    // برج العصر
-    if (x >= 553 && x <= 625 && y >= 210 && y <= 470) return 'asr';
-    // برج الفجر
-    if (x >= 110 && x <= 178 && y >= 240 && y <= 470) return 'fajr';
-    // برج المغرب
-    if (x >= 682 && x <= 750 && y >= 240 && y <= 470) return 'maghrib';
+    // برج العشاء (شمال/يسار الوسط تلي المغرب)
+    if (x >= 235 && x <= 307 && y >= 210 && y <= 470) return 'isha';
+    // برج الظهر (يمين الوسط يلي الفجر)
+    if (x >= 553 && x <= 625 && y >= 210 && y <= 470) return 'dhuhr';
+    // برج المغرب (أقصى الشمال/اليسار)
+    if (x >= 110 && x <= 178 && y >= 240 && y <= 470) return 'maghrib';
+    // برج العصر (أقصى اليمين ثم العصر)
+    if (x >= 682 && x <= 750 && y >= 240 && y <= 470) return 'asr';
     // نوافذ القرآن
     if ((x >= 270 && x <= 300 && y >= 370 && y <= 420) || (x >= 560 && x <= 590 && y >= 370 && y <= 420)) return 'quran_light';
     // السور الخارجي للأذكار
@@ -1599,19 +1599,6 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
             </button>
 
             <button
-              onClick={() => setShowDimensionsInspector(!showDimensionsInspector)}
-              className={`px-3.5 py-2 rounded-xl text-xs font-black header-font flex items-center gap-1.5 transition-all active:scale-95 border ${
-                showDimensionsInspector 
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
-                  : 'bg-white/10 text-slate-300 border-white/10 hover:bg-white/15'
-              }`}
-              title="إظهار / إخفاء مسطرة الأبعاد والتفاصيل المعمارية الحية"
-            >
-              <Ruler className="w-3.5 h-3.5 text-emerald-400" />
-              <span>أبعاد البنيان</span>
-            </button>
-
-            <button
               onClick={handleExportCanvasImage}
               disabled={isDownloading}
               className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black header-font flex items-center gap-1.5 transition-all shadow-md active:scale-95 border border-emerald-400/30 disabled:opacity-50"
@@ -1692,104 +1679,6 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
           </div>
         </div>
       </div>
-
-      {/* مسطرة الأبعاد والتفاصيل المعمارية الحية */}
-      {showDimensionsInspector && (
-        <div className="bg-gradient-to-r from-slate-900 to-slate-950 text-white rounded-2xl p-4 border border-emerald-500/20 shadow-lg text-xs animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-white/10">
-            <div className="flex items-center gap-2">
-              <Ruler className="w-4 h-4 text-emerald-400" />
-              <span className="font-black header-font text-emerald-300">
-                أبعاد البنيان المعماري الحية (تتغير تلقائياً مع الـ log)
-              </span>
-            </div>
-            <span className="text-[10px] text-slate-400 font-mono">
-              60 FPS Canvas Dynamic Engine
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2.5 text-[11px]">
-            <div 
-              onClick={() => setActiveSection('main_curtain_wall')}
-              className="bg-white/5 hover:bg-emerald-500/10 p-2.5 rounded-xl border border-white/5 cursor-pointer transition-all"
-            >
-              <span className="text-slate-400 block text-[10px]">ارتفاع السور الرئيسي</span>
-              <span className="font-mono font-black text-amber-300 text-sm">{24 + (fardDoneCount * 21)}م</span>
-              <span className="text-[9px] text-slate-300 block">{fardDoneCount} مداميك حجرية</span>
-            </div>
-
-            <div 
-              onClick={() => setActiveSection('outer_athkar_wall')}
-              className="bg-white/5 hover:bg-cyan-500/10 p-2.5 rounded-xl border border-white/5 cursor-pointer transition-all"
-            >
-              <span className="text-slate-400 block text-[10px]">السور الخارجي (الأذكار)</span>
-              <span className="font-mono font-black text-cyan-300 text-sm">
-                {athkarShield.totalPercent >= 35 ? `${18 + Math.round((athkarShield.totalPercent / 100) * 28)}م مضاف` : 'غير مضاف'}
-              </span>
-              <span className="text-[9px] text-slate-300 block">{athkarShield.totalPercent}% تحصين</span>
-            </div>
-
-            <div 
-              onClick={() => setActiveSection('isha')}
-              className="bg-white/5 hover:bg-emerald-500/10 p-2.5 rounded-xl border border-white/5 cursor-pointer transition-all"
-            >
-              <span className="text-slate-400 block text-[10px]">ارتفاع الصرح الأوسط</span>
-              <span className="font-mono font-black text-yellow-300 text-sm">
-                {fardData.isha.performed ? `${fardData.isha.inCongregation ? 296 : 260}م` : '24م (أساس)'}
-              </span>
-              <span className="text-[9px] text-slate-300 block">
-                {fardData.isha.inCongregation ? 'تاج الجماعة ⭐' : (fardData.isha.performed ? 'صلاة منفردة' : 'بانتظار العشاء')}
-              </span>
-            </div>
-
-            <div 
-              onClick={() => setActiveSection('qiyam_spire')}
-              className="bg-white/5 hover:bg-emerald-500/10 p-2.5 rounded-xl border border-white/5 cursor-pointer transition-all"
-            >
-              <span className="text-slate-400 block text-[10px]">منارة قيام الليل</span>
-              <span className="font-mono font-black text-sky-300 text-sm">
-                {nawafilData.qiyam ? '395م سامقة ✨' : 'غير مشيدة'}
-              </span>
-              <span className="text-[9px] text-slate-300 block">شعاع نوراني للسماء</span>
-            </div>
-
-            <div 
-              onClick={() => setActiveSection('quran_sunrays')}
-              className="bg-white/5 hover:bg-amber-500/10 p-2.5 rounded-xl border border-white/5 cursor-pointer transition-all"
-            >
-              <span className="text-slate-400 block text-[10px]">أشعة شمس الوحي</span>
-              <span className="font-mono font-black text-amber-300 text-sm">
-                {quranData.percent}% سطوع
-              </span>
-              <span className="text-[9px] text-slate-300 block truncate" title={quranData.summary}>
-                {quranData.percent > 0 ? (quranData.pagesCount > 0 ? `${quranData.pagesCount} ص تلاوة` : 'ورد منير') : 'بانتظار الورد'}
-              </span>
-            </div>
-
-            <div 
-              onClick={() => setActiveSection('athkar_shield')}
-              className="bg-white/5 hover:bg-emerald-500/10 p-2.5 rounded-xl border border-white/5 cursor-pointer transition-all"
-            >
-              <span className="text-slate-400 block text-[10px]">نصف قطر الدرع</span>
-              <span className="font-mono font-black text-emerald-300 text-sm">
-                {280 + Math.round((athkarShield.totalPercent / 100) * 120)}م
-              </span>
-              <span className="text-[9px] text-slate-300 block">هالة حماية دائرية</span>
-            </div>
-
-            <div 
-              onClick={() => setActiveSection('remembrance_moat')}
-              className="bg-white/5 hover:bg-emerald-500/10 p-2.5 rounded-xl border border-white/5 cursor-pointer transition-all"
-            >
-              <span className="text-slate-400 block text-[10px]">عمق خندق التسبيح</span>
-              <span className="font-mono font-black text-blue-300 text-sm">
-                {Math.min(100, Math.round((athkarShield.counters / 150) * 100))}% ممتلئ
-              </span>
-              <span className="text-[9px] text-slate-300 block">{athkarShield.counters} تسبيحة</span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* لوحة القلعة التفاعلية الحية بتقنية الـ Canvas 2D */}
       <div className="bg-gradient-to-b from-slate-950 via-slate-900 to-emerald-950 rounded-[2.5rem] p-4 sm:p-6 shadow-2xl border border-slate-800 relative overflow-hidden flex flex-col items-center">
@@ -1882,7 +1771,7 @@ export const FortressOfFaith: React.FC<FortressOfFaithProps> = ({ log, onSwitchT
             </div>
 
             <div className="bg-emerald-50/60 p-3 rounded-xl border border-emerald-100/60 flex items-start gap-2">
-              <Ruler className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+              <Compass className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
               <div>
                 <span className="font-black text-emerald-900 block text-[11px]">الأثر المعماري في بنيان القلعة:</span>
                 <p className="text-emerald-800 text-[11px] font-bold mt-0.5">
